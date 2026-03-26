@@ -1,0 +1,91 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альфа Страхование | Калькулятор</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+    <!-- Шапка сайта с красным градиентом и ссылкой на официальный сайт -->
+    <div class="header">
+        <a href="https://www.alfastrah.ru/" class="alfa-link" target="_blank">alfa.ru →</a>
+        <div class="logo-row">
+            <div class="logo-text">
+                <h1>АЛЬФА СТРАХОВАНИЕ</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Навигационное меню для переключения между страницами -->
+    <div class="nav">
+        <button class="nav-btn" data-page="about">ОБ АВТОРЕ</button>
+        <button class="nav-btn active" data-page="calculator">КАЛЬКУЛЯТОР</button>
+    </div>
+
+    <!-- Страница "Об авторе" с информацией о разработчике -->
+    <div id="about-page" class="page">
+        <div class="about-card">
+            <h3>РАЗРАБОТЧИК</h3>
+            <div class="name">Андреев Герман</div>
+            <div class="details">
+                Студент ИУ5-43Б<br>
+                Веб-разработчик, создатель этого калькулятора
+            </div>
+            <div class="links">
+                <a href="https://github.com/qwxth" target="_blank">GitHub →</a>
+                <a href="tel:89997125135">📞 8 (999) 712-51-35</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Страница калькулятора -->
+    <div id="calculator-page" class="page active">
+        <!-- Экран калькулятора для отображения результата -->
+        <div class="calc-screen" id="calcResult">0</div>
+
+        <!-- Сетка кнопок калькулятора -->
+        <div class="calc-buttons">
+            <!-- Первый ряд: функции очистки, смены знака, процента и деление -->
+            <div class="calc-row">
+                <button class="calc-btn secondary" data-action="clear">C</button>
+                <button class="calc-btn secondary" data-action="sign">+/-</button>
+                <button class="calc-btn secondary" data-action="percent">%</button>
+                <button class="calc-btn primary" data-op="/">÷</button>
+            </div>
+            <!-- Второй ряд: цифры 7,8,9 и умножение -->
+            <div class="calc-row">
+                <button class="calc-btn" data-digit="7">7</button>
+                <button class="calc-btn" data-digit="8">8</button>
+                <button class="calc-btn" data-digit="9">9</button>
+                <button class="calc-btn primary" data-op="*">×</button>
+            </div>
+            <!-- Третий ряд: цифры 4,5,6 и вычитание -->
+            <div class="calc-row">
+                <button class="calc-btn" data-digit="4">4</button>
+                <button class="calc-btn" data-digit="5">5</button>
+                <button class="calc-btn" data-digit="6">6</button>
+                <button class="calc-btn primary" data-op="-">−</button>
+            </div>
+            <!-- Четвертый ряд: цифры 1,2,3 и сложение -->
+            <div class="calc-row">
+                <button class="calc-btn" data-digit="1">1</button>
+                <button class="calc-btn" data-digit="2">2</button>
+                <button class="calc-btn" data-digit="3">3</button>
+                <button class="calc-btn primary" data-op="+">+</button>
+            </div>
+            <!-- Пятый ряд: цифра 0, точка и равно -->
+            <div class="calc-row">
+                <button class="calc-btn wide" data-digit="0">0</button>
+                <button class="calc-btn" data-digit=".">.</button>
+                <button class="calc-btn primary" data-action="equal">=</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
