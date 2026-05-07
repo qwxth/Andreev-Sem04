@@ -3,13 +3,13 @@ import { MainPage } from "../main/index.js";
 import { Car3DComponent } from "../../components/car-3d/index.js";
 
 export class ProductPage {
-    constructor(parent, id, color) {
+    constructor(parent, id, modelPath) {
         this.parent = parent;
         this.id = id;
-        this.color = color;
+        this.modelPath = modelPath;
     }
     getHTML() {
-        return `<div class="container py-5"><div class="row g-5 align-items-center"><div class="col-md-6"><div id="car-3d-container" style="width:100%; height:400px; border-radius:20px; overflow:hidden;"></div></div><div class="col-md-6"><div id="product-detail-info"></div></div></div></div>`;
+        return `<div class="container py-5"><div class="row g-5 align-items-center"><div class="col-md-6"><div id="car-3d-container" style="width:100%; height:400px; border-radius:20px; overflow:hidden; position:relative;"></div></div><div class="col-md-6"><div id="product-detail-info"></div></div></div></div>`;
     }
     getData() {
         const map = {
@@ -30,7 +30,7 @@ export class ProductPage {
         infoDiv.innerHTML = `<h1 class="display-5 fw-bold">${data.title}</h1><div class="fs-2 text-danger fw-bold mt-3">${data.price}</div><p class="mt-4 lead">${data.fullText}</p><button class="btn btn-red btn-lg mt-3" id="detail-order-btn">Оформить онлайн</button>`;
         document.getElementById('detail-order-btn')?.addEventListener('click', () => alert('Демо. Оформление на официальном сайте.'));
         const container = document.getElementById('car-3d-container');
-        const car3d = new Car3DComponent(container, this.color);
+        const car3d = new Car3DComponent(container, this.modelPath);
         car3d.render();
     }
 }
