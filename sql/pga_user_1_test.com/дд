@@ -1,0 +1,5 @@
+-- Отзываем право на вставку у роли read_only_role
+REVOKE INSERT ON customers FROM read_only_role;
+
+-- Проверка: пользователь с ролью read_only_role не может вставить данные
+-- INSERT INTO customers (...) VALUES (...); -- Будет ошибка

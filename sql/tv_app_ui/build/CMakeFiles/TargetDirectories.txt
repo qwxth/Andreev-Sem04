@@ -1,0 +1,5 @@
+/home/qwxth_laptop/labs/Andreev-Sem04/sql/tv_app_ui/build/CMakeFiles/tv_app_ui.dir
+/home/qwxth_laptop/labs/Andreev-Sem04/sql/tv_app_ui/build/CMakeFiles/edit_cache.dir
+/home/qwxth_laptop/labs/Andreev-Sem04/sql/tv_app_ui/build/CMakeFiles/rebuild_cache.dir
+/home/qwxth_laptop/labs/Andreev-Sem04/sql/tv_app_ui/build/CMakeFiles/tv_app_ui_autogen_timestamp_deps.dir
+/home/qwxth_laptop/labs/Andreev-Sem04/sql/tv_app_ui/build/CMakeFiles/tv_app_ui_autogen.dir

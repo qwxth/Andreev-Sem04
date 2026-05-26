@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альфа-Страхование | Защита автомобиля</title>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --alfa-red: #E31E24; --alfa-dark: #1A2C3E; }
+        body { font-family: 'Inter', sans-serif; background: white; margin:0; }
+        .top-bar { background: white; font-size: 13px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .navbar-main { background: white; padding: 16px 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+        .logo { font-weight: 800; font-size: 28px; }
+        .logo span:first-child { color: var(--alfa-red); }
+        .logo span:last-child { color: var(--alfa-dark); }
+        .nav-link-custom { font-weight: 600; color: var(--alfa-dark) !important; margin: 0 12px; text-decoration: none; }
+        .nav-link-custom:hover { color: var(--alfa-red) !important; }
+        .btn-red { background-color: var(--alfa-red); border: none; border-radius: 40px; padding: 8px 28px; font-weight: 600; color: white; transition: 0.2s; }
+        .btn-red:hover { background-color: #B5181C; transform: translateY(-1px); }
+        .btn-outline-red { border: 1px solid var(--alfa-red); background: transparent; border-radius: 40px; padding: 8px 24px; color: var(--alfa-red); font-weight: 600; }
+        .btn-outline-red:hover { background: var(--alfa-red); color: white; }
+        .hero { background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 100%); padding: 60px 0 40px; text-align: center; }
+        .hero h1 { font-size: 48px; font-weight: 800; color: var(--alfa-dark); }
+        .hero h1 span { color: var(--alfa-red); }
+        .product-showcase { padding: 40px 0 60px; }
+        .product-card { background: white; border-radius: 32px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1); overflow: hidden; padding-bottom: 16px; }
+        .tab-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; padding: 20px 20px 0; border-bottom: 2px solid #eee; background: white; }
+        .tab-btn { background: none; border: none; font-weight: 700; font-size: 18px; padding: 8px 20px; border-radius: 40px; color: #6c757d; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background-color: var(--alfa-red); color: white; }
+        .tab-btn:hover:not(.active) { background-color: #FFD9DA; color: var(--alfa-red); }
+        .add-btn { background-color: #28a745; color: white; }
+        .add-btn:hover { background-color: #218838; }
+        .product-image-container { position: relative; background-size: cover; background-position: center; border-radius: 24px; margin: 0 16px 16px 16px; min-height: 500px; overflow: hidden; }
+        .product-overlay { position: absolute; top: 0; left: 0; bottom: 0; width: 50%; background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 70%, transparent 100%); color: white; padding: 40px; backdrop-filter: blur(2px); display: flex; flex-direction: column; justify-content: center; }
+        .product-overlay h2 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
+        .product-overlay .product-price { font-size: 28px; font-weight: 800; color: #FFD966; margin: 10px 0; }
+        .product-overlay p { font-size: 16px; margin-bottom: 20px; max-width: 90%; }
+        .footer { background: var(--alfa-dark); color: #9aaebf; padding: 48px 0 24px; margin-top: 60px; }
+        .footer a { color: #9aaebf; text-decoration: none; }
+        .footer a:hover { color: white; }
+        .footer-logo { font-size: 24px; font-weight: 800; margin-bottom: 16px; }
+        .copyright { border-top: 1px solid #2a3e54; margin-top: 32px; padding-top: 24px; text-align: center; font-size: 13px; }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 32px; }
+            .tab-btn { font-size: 14px; padding: 6px 14px; }
+            .product-overlay { width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.6) 100%); bottom: 0; top: auto; padding: 30px 20px; }
+            .product-overlay p { max-width: 100%; }
+            .product-image-container { min-height: 450px; }
+        }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+        }
+    }
+</script>
+<script src="main.js" type="module"></script>
+<script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
