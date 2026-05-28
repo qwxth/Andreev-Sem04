@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "title": "дл",
+    "description": "л",
+    "price": "от 2 490 ₽",
+    "image": "https://picsum.photos/id/107/400/300",
+    "modelPath": "models/chevrolet.glb"
+  }
+]
