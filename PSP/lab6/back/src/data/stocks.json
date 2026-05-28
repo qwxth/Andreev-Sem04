@@ -1,29 +1,21 @@
 [
   {
-    "id": 1,
-    "title": "дл",
-    "description": "л",
-    "price": "от 2 490 ₽",
-    "image": "https://picsum.photos/id/107/400/300",
+    "id": 4,
+    "src": "",
+    "title": "машинка",
+    "text": "",
+    "description": "архиепископ августинг четвертый",
+    "price": "от 2 490 ₽0000",
+    "image": "https://picsum.photos/id/109/400/300",
     "modelPath": "models/chevrolet.glb"
   },
   {
-    "id": 2,
+    "id": 5,
     "src": "",
-    "title": "d",
+    "title": "Моя новая акция",
     "text": "",
-    "description": "d",
-    "price": "от 2 490 ₽",
-    "image": "https://picsum.photos/id/107/400/300",
-    "modelPath": "models/chevrolet.glb"
-  },
-  {
-    "id": 3,
-    "src": "",
-    "title": "d",
-    "text": "",
-    "description": "d",
-    "price": "от 2 490 ₽",
+    "description": "Описание",
+    "price": "от 1000 ₽",
     "image": "https://picsum.photos/id/107/400/300",
     "modelPath": "models/chevrolet.glb"
   }
