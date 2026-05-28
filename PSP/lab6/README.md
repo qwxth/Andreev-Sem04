@@ -26,52 +26,55 @@
 
 ### main.js
 ```javascript
-import { getReports } from './modules/reportApi.js';
-
-async function loadReports() {
-  const reports = await getReports();
-  const container = document.getElementById('reportsContainer');
-  container.innerHTML = '';
-  reports.forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'report-card';
-    div.innerHTML = `<strong>${r.title}</strong><br>${r.description}<br>${r.category}`;
-    container.appendChild(div);
-  });
+async loadProducts() {
+    try {
+        const response = await fetch(stockUrls.getStocks());
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        // преобразование данных в формат компонента
+        this.products = {};
+        data.forEach(p => {
+            const key = `product_${p.id}`;
+            this.products[key] = { ... };
+        });
+    } catch (err) {
+        console.error("Ошибка загрузки карточек:", err);
+        this.products = {};
+    }
 }
-
-document.addEventListener('DOMContentLoaded', loadReports);
 ````
 
 ### modules/reportApi.js
 
 ```javascript
-import { API_BASE_URL } from './reportUrls.js';
-
-export async function getReports(query = '') {
-  try {
-    const res = await fetch(`${API_BASE_URL}?title=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error(res.status);
-    return await res.json();
-  } catch (err) {
-    console.error('Ошибка получения отчётов:', err);
-    return [];
-  }
-}
-
-export async function addReport(reportData) {
-  try {
-    const res = await fetch(API_BASE_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(reportData)
-    });
-    if (!res.ok) throw new Error(res.status);
-    return await res.json();
-  } catch (err) {
-    console.error('Ошибка добавления отчёта:', err);
-  }
-}
+this.submitHandler = async (e) => {
+    e.preventDefault();
+    // собираем данные из формы
+    const payload = {
+        title: title,
+        description: description,
+        price: price,
+        image: image,
+        modelPath: modelPath
+    };
+    try {
+        const response = await fetch(stockUrls.createStock(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (response.status === 201) {
+            alert('Карточка создана!');
+            new MainPage(this.parent).render(); // возврат на главную
+        } else {
+            alert('Ошибка: ' + (data?.error || 'неизвестная ошибка'));
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Ошибка соединения с сервером');
+    }
+};
 ```
 
 ### pages/add.html
@@ -195,9 +198,7 @@ lab_6/
 │   └── reportCard.js
 ├── styles.css
 └── screenshots/
-    ├── home.png
-    ├── add.png
-    └── list.png
+    └── home.png
 ```
 
 ---
