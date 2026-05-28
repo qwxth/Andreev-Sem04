@@ -145,10 +145,10 @@ lab5/
 ├── models/
 └── styles.css
 
-4. Скриншоты работающего приложения
+4. **Скриншоты работающего приложения**
 https:///PSP/lab6/home.png
 
-5. Важные части кода
+5. **Важные части кода**
 modules/ajax.js – обёртка над XMLHttpRequest для GET, POST, DELETE.
 
 components/product-switch/index.js – загрузка карточек и удаление через XHR.
@@ -157,7 +157,7 @@ pages/create/index.js – форма создания карточки (POST-з�
 
 back/src/index.js – бэкенд Express, запускаемый на порту 3000.
 
-6. Вывод
+6. **Вывод**
 Реализовано полноценное CRUD-взаимодействие с бэкендом через XMLHttpRequest.
 
 Добавлена возможность создания новых карточек (POST /stocks).
