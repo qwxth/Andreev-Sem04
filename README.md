@@ -146,9 +146,7 @@ lab5/
 └── styles.css
 
 4. Скриншоты работающего приложения
-https:///PSP/lab5/home.png
-https:///PSP/lab5/add.png
-https:///PSP/lab5/detail.png
+https:///PSP/lab6/home.png
 
 5. Важные части кода
 modules/ajax.js – обёртка над XMLHttpRequest для GET, POST, DELETE.
