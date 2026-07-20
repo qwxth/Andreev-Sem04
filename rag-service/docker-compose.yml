@@ -7,7 +7,7 @@ services:
       - node.name=opensearch-node
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=Admin_password123!
       - plugins.security.disabled=false
     ulimits:
@@ -21,24 +21,8 @@ services:
       - opensearch-data:/usr/share/opensearch/data
     ports:
       - "9200:9200"
-      - "9600:9600"
     networks:
       - rag-network
-
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.13.0
-    container_name: opensearch-dashboards
-    ports:
-      - "5601:5601"
-    environment:
-      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
-      OPENSEARCH_USERNAME: admin
-      OPENSEARCH_PASSWORD: Admin_password123!
-      OPENSEARCH_SSL_VERIFICATIONMODE: none
-    networks:
-      - rag-network
-    depends_on:
-      - opensearch
 
   ollama:
     image: ollama/ollama:latest
@@ -50,9 +34,8 @@ services:
     networks:
       - rag-network
     environment:
-      - OLLAMA_NUM_PARALLEL=2
-      - OLLAMA_MAX_LOADED_MODELS=2
-    restart: unless-stopped
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
 
   rag-app:
     build:
@@ -70,7 +53,6 @@ services:
       - GENERATION_MODEL=qwen3
       - INDEX_NAME=ia_index1
       - TOP_K_RESULTS=5
-      - EMBEDDING_DIMENSION=4096
     networks:
       - rag-network
     depends_on:
