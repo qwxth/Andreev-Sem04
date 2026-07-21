@@ -26,6 +26,7 @@ text
 ## API
 
 ### POST /documents – загрузка документа
+```json
 curl -X POST http://localhost:8000/documents
 -H "Content-Type: application/json"
 -d '{
@@ -34,7 +35,7 @@ curl -X POST http://localhost:8000/documents
 "doc_class": "pricing",
 "summary": "Цены на экспертизу"
 }'
-
+```json
 text
 
 
