@@ -23,6 +23,12 @@ services:
       - "9200:9200"
     networks:
       - rag-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sk -u admin:Admin_password123! https://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   ollama:
     image: ollama/ollama:latest
@@ -36,6 +42,7 @@ services:
     environment:
       - OLLAMA_NUM_PARALLEL=1
       - OLLAMA_MAX_LOADED_MODELS=1
+    restart: unless-stopped
 
   rag-app:
     build:
@@ -53,12 +60,21 @@ services:
       - GENERATION_MODEL=qwen3
       - INDEX_NAME=ia_index1
       - TOP_K_RESULTS=5
+      - TOP_M_CONTEXT=3
     networks:
       - rag-network
     depends_on:
-      - opensearch
-      - ollama
+      opensearch:
+        condition: service_healthy
+      ollama:
+        condition: service_started
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
 
 volumes:
   opensearch-data:

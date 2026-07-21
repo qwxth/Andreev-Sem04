@@ -7,17 +7,26 @@ from models.schemas import RelevantDocument
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+# Singleton клиент — не создаём новое соединение на каждый запрос
+_client: Optional[OpenSearch] = None
+
+
 def get_opensearch_client() -> OpenSearch:
-    return OpenSearch(
-        hosts=[settings.opensearch_host],
-        http_auth=(settings.opensearch_user, settings.opensearch_password),
-        use_ssl=True,
-        verify_certs=False,
-        ssl_show_warn=False,
-        timeout=60,
-        retry_on_timeout=True,
-        max_retries=3
-    )
+    global _client
+    if _client is None:
+        _client = OpenSearch(
+            hosts=[settings.opensearch_host],
+            http_auth=(settings.opensearch_user, settings.opensearch_password),
+            use_ssl=True,
+            verify_certs=False,
+            ssl_show_warn=False,
+            timeout=60,
+            retry_on_timeout=True,
+            max_retries=3
+        )
+        logger.info("OpenSearch клиент создан (singleton)")
+    return _client
+
 
 def check_opensearch_health() -> str:
     client = get_opensearch_client()
@@ -28,6 +37,7 @@ def check_opensearch_health() -> str:
         logger.error(f"Ошибка проверки OpenSearch: {e}")
         return "unavailable"
 
+
 def check_index_exists() -> bool:
     client = get_opensearch_client()
     try:
@@ -35,6 +45,7 @@ def check_index_exists() -> bool:
     except Exception as e:
         logger.error(f"Ошибка проверки индекса: {e}")
         return False
+
 
 def index_document(
     content: str,
@@ -77,8 +88,12 @@ def index_document(
             "body": doc_body,
             "refresh": True
         }
-        if document_id:
-            index_kwargs["id"] = document_id
+
+        # Если есть document_id — используем составной _id (document_id + chunk)
+        # чтобы несколько чанков одного документа не перезаписывали друг друга
+        if document_id is not None:
+            opensearch_id = f"{document_id}__chunk_{chunk_index}" if chunk_index else document_id
+            index_kwargs["id"] = opensearch_id
 
         response = client.index(**index_kwargs)
         logger.info(f"Документ проиндексирован: {response['_id']}")
@@ -86,6 +101,46 @@ def index_document(
     except Exception as e:
         logger.error(f"Ошибка индексирования: {e}")
         raise
+
+
+def delete_document(document_id: str) -> Dict[str, Any]:
+    """
+    Удаляет документ(ы) по document_id.
+    Сначала пытается удалить по _id напрямую,
+    затем ищет по полю documentId (для чанков).
+    """
+    client = get_opensearch_client()
+    total_deleted = 0
+
+    # 1. Удалить по прямому _id (документ без чанков)
+    try:
+        client.delete(
+            index=settings.index_name,
+            id=document_id,
+            refresh=True
+        )
+        total_deleted += 1
+        logger.info(f"Удалён по _id: {document_id}")
+    except Exception:
+        pass  # не найден по прямому _id — ищем по полю documentId
+
+    # 2. Удалить по полю documentId (чанки вида "doc-001__chunk_1")
+    try:
+        result = client.delete_by_query(
+            index=settings.index_name,
+            body={"query": {"term": {"documentId": document_id}}},
+            refresh=True
+        )
+        deleted_by_query = result.get("deleted", 0)
+        total_deleted += deleted_by_query
+        if deleted_by_query:
+            logger.info(f"Удалено по documentId '{document_id}': {deleted_by_query} записей")
+    except Exception as e:
+        logger.error(f"Ошибка delete_by_query для {document_id}: {e}")
+        raise
+
+    return {"deleted": total_deleted}
+
 
 def search_similar_documents(
     query_embedding: List[float],

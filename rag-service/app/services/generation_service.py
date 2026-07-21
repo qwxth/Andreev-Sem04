@@ -9,22 +9,27 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-def build_rag_prompt(question: str, documents) -> str:
+def _format_docs(documents) -> str:
     docs_text = ""
     for i, doc in enumerate(documents, 1):
         doc_id = doc.document_id or doc.opensearch_id
         doc_class = f" | Класс: {doc.doc_class}" if doc.doc_class else ""
         summary = f" | Краткое: {doc.summary}" if doc.summary else ""
-        
         docs_text += f"\n--- Документ {i} (ID: {doc_id}{doc_class}{summary}) ---\n{doc.content}\n"
-    
-    return f"""Ты — ассистент. Отвечай ТОЛЬКО на русском, БЕЗ рассуждений, ТОЛЬКО по документам.
+    return docs_text
 
-=== ВАЖНО ===
+
+def build_rag_prompt(question: str, documents) -> str:
+    docs_text = _format_docs(documents)
+
+    return f"""Ты — ассистент. Отвечай ТОЛЬКО на русском языке, без рассуждений.
+
+=== ПРАВИЛА ===
 - Используй ТОЛЬКО информацию из документов ниже
-- При ответе указывай ID документа (например: "Согласно документу doc-001...")
-- Если ответа нет в документах — так и скажи
-- НЕ выдумывай факты
+- ВСЕГДА указывай ID документа при каждом факте (например: "Согласно документу BUILD-001...")
+- Если в документах нет ответа — так и скажи: "В предоставленных документах информация отсутствует"
+- НЕ выдумывай факты и НЕ используй внешние знания
+- Отвечай только на русском языке, даже если вопрос задан на другом языке
 
 === ДОКУМЕНТЫ ===
 {docs_text}
@@ -35,33 +40,30 @@ def build_rag_prompt(question: str, documents) -> str:
 === ОТВЕТ ==="""
 
 
-def build_chat_prompt(documents, history, new_message):
-    docs_text = ""
-    for i, doc in enumerate(documents, 1):
-        doc_id = doc.document_id or doc.opensearch_id
-        doc_class = f" | Класс: {doc.doc_class}" if doc.doc_class else ""
-        
-        docs_text += f"\n--- Документ {i} (ID: {doc_id}{doc_class}) ---\n{doc.content}\n"
+def build_chat_prompt(documents, history, new_message: str) -> str:
+    docs_text = _format_docs(documents)
 
     history_text = ""
     for msg in history:
         role = "Пользователь" if msg.role == "user" else "Ассистент"
         history_text += f"{role}: {msg.content}\n"
 
-    return f"""Ты — ассистент. Отвечай ТОЛЬКО на русском, БЕЗ рассуждений, ТОЛЬКО по документам.
+    return f"""Ты — ассистент. Отвечай ТОЛЬКО на русском языке, без рассуждений.
 
-=== ВАЖНО ===
+=== ПРАВИЛА ===
 - Используй ТОЛЬКО документы этой сессии (указаны ниже)
-- При вопросах "в каком документе" — указывай ID документа
+- ВСЕГДА указывай ID документа при каждом факте (например: "Согласно документу BUILD-001...")
+- Если спрашивают "в каком документе" — обязательно называй ID
+- Если в документах нет ответа — так и скажи: "В предоставленных документах информация отсутствует"
 - Учитывай историю диалога
-- НЕ выдумывай факты
+- НЕ выдумывай факты и НЕ используй внешние знания
+- Отвечай только на русском языке, даже если вопрос задан на другом языке
 
-=== ДОКУМЕНТЫ СЕССИИ (только они!) ===
+=== ДОКУМЕНТЫ СЕССИИ ===
 {docs_text}
 
 === ИСТОРИЯ ДИАЛОГА ===
 {history_text}
-
 === НОВЫЙ ВОПРОС ===
 {new_message}
 
@@ -76,12 +78,13 @@ async def _call_ollama(prompt: str) -> str:
         "stream": False,
         "options": {"temperature": 0.1, "num_predict": 2048}
     }
-    
+
     async with httpx.AsyncClient(timeout=300.0) as client:
         response = await client.post(url, json=payload)
         response.raise_for_status()
         data = response.json()
         answer = data.get("response", "").strip()
+        # Убираем блоки рассуждений <think>...</think> (Qwen3)
         answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
         return answer if answer else "Нет ответа"
 
@@ -95,7 +98,9 @@ async def generate_answer(question: str, documents) -> str:
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=15))
-async def generate_chat_answer(documents, history, message):
+async def generate_chat_answer(documents, history, message: str) -> str:
+    if not documents:
+        return "Документы сессии не найдены"
     prompt = build_chat_prompt(documents, history, message)
     return await _call_ollama(prompt)
 
@@ -108,5 +113,5 @@ async def check_generation_model() -> bool:
             response.raise_for_status()
             models = [m["name"] for m in response.json().get("models", [])]
             return any(settings.generation_model in m for m in models)
-        except:
+        except Exception:
             return False
