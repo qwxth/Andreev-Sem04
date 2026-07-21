@@ -14,108 +14,158 @@
 - Удаление документов и сессий
 
 ## Быстрый старт
-
 docker compose up -d
 docker exec ollama ollama pull qwen3-embedding
 docker exec ollama ollama pull qwen2.5:0.5b
 docker compose restart rag-app
 python3 scripts/create_index.py --recreate
 
+text
+
+
 ## API
 
-### POST /documents
+### POST /documents – загрузка документа
+curl -X POST http://localhost:8000/documents
+-H "Content-Type: application/json"
+-d '{
+"content": "Стоимость строительной экспертизы от 30000 до 500000 рублей.",
+"document_id": "BUILD-001",
+"doc_class": "pricing",
+"summary": "Цены на экспертизу"
+}'
 
-Загрузка документа.
+text
 
-Тело запроса:
-{
-  "content": "Текст документа",
-  "document_id": "doc-001",
-  "doc_class": "category",
-  "summary": "Краткое описание"
-}
 
-Ответ:
+**Ответ:**
+```json
 {
   "success": true,
-  "document_id": "doc-001",
-  "opensearch_id": "...",
+  "document_id": "BUILD-001",
+  "opensearch_id": "BUILD-001",
   "message": "OK, vector=4096d"
 }
+POST /search – поиск + создание сессии
+text
 
-### POST /search
-
-Поиск + создание сессии.
-
-Тело запроса:
-{
-  "question": "Ваш вопрос",
-  "top_k": 5,
-  "top_m": 3
-}
-
-Параметры:
-- top_k — сколько документов искать (по умолчанию 5)
-- top_m — сколько документов передать в контекст модели (по умолчанию 3)
-
+curl -s --max-time 240 -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Стоимость экспертизы",
+    "top_k": 5,
+    "top_m": 3
+  }' | jq .
 Ответ:
+
+JSON
+
 {
-  "question": "Ваш вопрос",
-  "answer": "Сгенерированный ответ...",
+  "question": "Стоимость экспертизы",
+  "answer": "Стоимость строительной экспертизы от 30000 до 500000 рублей (согласно документу BUILD-001).",
   "relevant_documents": [
-    {"document_id": "...", "content": "...", "score": 1.57}
+    {
+      "opensearch_id": "BUILD-001",
+      "document_id": "BUILD-001",
+      "content": "Стоимость строительной экспертизы от 30000 до 500000 рублей.",
+      "score": 1.585,
+      "chunk_index": 0,
+      "doc_class": "pricing",
+      "summary": "Цены на экспертизу"
+    }
   ],
   "documents_used_count": 3,
-  "session_id": "uuid-сессии",
-  "document_ids": ["doc-001", "doc-002"]
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "document_ids": ["BUILD-001", "BUILD-002", "BUILD-003"]
 }
+POST /chat – продолжение диалога
+text
 
-### POST /chat
-
-Продолжение диалога в контексте созданной сессии.
-
-Тело запроса:
-{
-  "session_id": "uuid-сессии",
-  "message": "Уточняющий вопрос"
-}
-
+curl -s --max-time 240 -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "550e8400-e29b-41d4-a716-446655440000",
+    "message": "Сколько дней занимает экспертиза?"
+  }' | jq .
 Ответ:
+
+JSON
+
 {
-  "answer": "Ответ модели...",
-  "session_id": "uuid-сессии",
-  "document_ids": ["doc-001", "doc-002"],
+  "answer": "Срок проведения экспертизы 5-30 рабочих дней (документ BUILD-002).",
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "document_ids": ["BUILD-001", "BUILD-002", "BUILD-003"],
   "history": [
-    { "role": "user", "content": "..." },
-    { "role": "assistant", "content": "..." }
+    {"role": "user", "content": "Стоимость экспертизы"},
+    {"role": "assistant", "content": "Стоимость строительной экспертизы от 30000 до 500000 рублей..."},
+    {"role": "user", "content": "Сколько дней занимает экспертиза?"},
+    {"role": "assistant", "content": "Срок проведения экспертизы 5-30 рабочих дней..."}
   ]
 }
+GET /session/{id} – просмотр сессии
+text
 
-### DELETE /session/{session_id}
+curl -s http://localhost:8000/session/550e8400-e29b-41d4-a716-446655440000 | jq .
+Ответ:
 
-Удаление сессии.
+JSON
 
-### GET /session/{session_id}
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "documents_count": 3,
+  "document_ids": ["BUILD-001", "BUILD-002", "BUILD-003"],
+  "messages_count": 4,
+  "history": [
+    {"role": "user", "content": "..."},
+    {"role": "assistant", "content": "..."}
+  ]
+}
+DELETE /session/{id} – удаление сессии
+text
 
-Просмотр состояния сессии (документы, история).
+curl -s -X DELETE http://localhost:8000/session/550e8400-e29b-41d4-a716-446655440000 | jq .
+Ответ:
 
-### DELETE /documents/{document_id}
+JSON
 
-Удаление документа из индекса.
+{
+  "message": "Сессия 550e8400-e29b-41d4-a716-446655440000 удалена",
+  "next": "Используйте POST /search для нового поиска"
+}
+DELETE /documents/{id} – удаление документа из индекса
+text
 
-### GET /health
+curl -s -X DELETE http://localhost:8000/documents/BUILD-001 | jq .
+Ответ:
 
-Проверка состояния сервиса.
+JSON
 
-## Архитектура
+{
+  "success": true,
+  "deleted": 1,
+  "message": "Документ BUILD-001 удалён"
+}
+GET /health – проверка состояния сервиса
+text
 
+curl -s http://localhost:8000/health | jq .
+Ответ:
+
+JSON
+
+{
+  "status": "healthy",
+  "opensearch": "green",
+  "embedding": "ok",
+  "generation": "ok",
+  "index": true
+}
+Архитектура
 Пользователь -> FastAPI -> OpenSearch (поиск) -> Ollama (embeddings + генерация)
 
-1. Документ -> эмбеддинг через Ollama -> сохранение в OpenSearch
-2. Вопрос -> эмбеддинг -> k-NN поиск в OpenSearch
-3. Найденные документы + вопрос -> генеративная модель -> ответ
-
-## Модели
-
-- qwen3-embedding — для эмбеддингов (4096d)
-- qwen2.5:0.5b — для генерации (можно заменить на qwen2.5:3b, qwen3)
+Документ -> эмбеддинг через Ollama -> сохранение в OpenSearch
+Вопрос -> эмбеддинг -> k-NN поиск в OpenSearch
+Найденные документы + вопрос -> генеративная модель -> ответ
+Модели
+qwen3-embedding — для эмбеддингов (4096d)
+qwen2.5:0.5b — для генерации (можно заменить на qwen2.5:3b, qwen3)
