@@ -1,3 +1,4 @@
+```json
 # RAG-сервис (Retrieval-Augmented Generation)
 
 Система вопросно-ответного поиска по документам на основе RAG-архитектуры.
@@ -35,7 +36,7 @@ curl -X POST http://localhost:8000/documents
 "doc_class": "pricing",
 "summary": "Цены на экспертизу"
 }'
-```json
+
 text
 
 
