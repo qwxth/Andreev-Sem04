@@ -1,1 +1,43 @@
-echo "=== STATUS ===" && docker ps --format "table {{.Names}}\t{{.Status}}" && echo "" && echo "=== OPENSEARCH ===" && curl -sk -u admin:Admin_password123! https://localhost:9200/_cluster/health 2>&1 | head -3 && echo "" && echo "=== REDIS ===" && docker exec rag-redis redis-cli ping 2>&1 && echo "" && echo "=== OLLAMA ===" && curl -s http://localhost:11434/api/tags 2>&1 | head -3 && echo "" && echo "=== RAG-APP ===" && curl -s http://localhost:8000/health 2>&1
+curl -k -u admin:Admin_password123! -X DELETE https://localhost:9200/ia_index1
+
+curl -k -u admin:Admin_password123! -X PUT https://localhost:9200/ia_index1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "settings": {
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 1,
+        "knn": true,
+        "knn.algo_param.ef_search": 512
+      }
+    },
+    "mappings": {
+      "properties": {
+        "content": {"type": "text"},
+        "embedding": {
+          "type": "knn_vector",
+          "dimension": 4096,
+          "method": {
+            "name": "hnsw",
+            "space_type": "innerproduct",
+            "engine": "lucene",
+            "parameters": {
+              "m": 16,
+              "ef_construction": 512
+            }
+          }
+        },
+        "chunkIndex": {"type": "integer"},
+        "classifiers": {"type": "keyword"},
+        "docclass": {"type": "text"},
+        "documentDate": {"type": "date"},
+        "documentId": {"type": "keyword"},
+        "model": {"type": "keyword"},
+        "note": {"type": "text"},
+        "summary": {"type": "text"},
+        "senderfull": {"type": "text"}
+      }
+    }
+  }'
+
+curl http://localhost:8000/health
